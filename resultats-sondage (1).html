@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Résultats du sondage — Politique de télétravail</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --green: #1a7a4a; --green-light: #e8f5ef; --green-mid: #9fd4b8;
+  --border: #e0ddd6; --bg: #f5f4f0; --white: #fff;
+  --text: #1a1a1a; --muted: #6b6b6b; --radius: 12px; --radius-sm: 8px;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.6; }
+header { background: var(--white); border-bottom: 1px solid var(--border); padding: 2rem 1.5rem 1.5rem; text-align: center; }
+header h1 { font-size: 1.35rem; font-weight: 600; margin-bottom: 0.3rem; }
+header p { font-size: 0.875rem; color: var(--muted); }
+.badge { display: inline-block; background: var(--green-light); color: var(--green); font-size: 0.72rem; font-weight: 600; padding: 3px 11px; border-radius: 20px; margin-top: 0.6rem; }
+.section-nav { display: flex; justify-content: center; gap: 8px; padding: 1.1rem 1rem; position: sticky; top: 0; background: var(--bg); border-bottom: 1px solid var(--border); z-index: 10; }
+.snav-btn { font-family: inherit; font-size: 0.82rem; font-weight: 500; padding: 7px 20px; border-radius: 20px; border: 1px solid var(--border); background: var(--white); color: var(--muted); cursor: pointer; transition: all 0.15s; }
+.snav-btn:hover { border-color: #aaa; color: var(--text); }
+.snav-btn.active { background: var(--green); border-color: var(--green); color: #fff; }
+main { max-width: 800px; margin: 0 auto; padding: 2rem 1rem 5rem; }
+.section-panel { display: none; }
+.section-panel.visible { display: block; }
+.section-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 1.25rem; }
+.mc-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+.mc-question { font-size: 0.97rem; font-weight: 500; line-height: 1.5; margin-bottom: 0.25rem; }
+.mc-note { font-size: 0.78rem; color: var(--muted); margin-bottom: 1rem; font-style: italic; }
+.mc-n { font-size: 0.78rem; color: var(--muted); margin-bottom: 1rem; }
+.bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.bar-row:last-child { margin-bottom: 0; }
+.bar-label { font-size: 0.82rem; width: 230px; flex-shrink: 0; line-height: 1.3; }
+.bar-track { flex: 1; background: #f0ede8; border-radius: 4px; height: 22px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width 0.7s ease; }
+.c-neg { background: #c0392b; } .c-warn { background: #d4880a; } .c-neu { background: #aaa; } .c-pos { background: var(--green); }
+.bar-count { font-size: 0.8rem; font-weight: 600; color: var(--muted); min-width: 20px; text-align: right; }
+.bar-pct { font-size: 0.75rem; color: #bbb; min-width: 36px; }
+.rank-row { margin-bottom: 14px; } .rank-row:last-child { margin-bottom: 0; }
+.rank-label { font-size: 0.83rem; font-weight: 500; margin-bottom: 5px; }
+.rank-bars { display: flex; gap: 2px; height: 20px; border-radius: 4px; overflow: hidden; width: 100%; }
+.rank-seg { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 600; color: white; transition: width 0.7s ease; }
+.r1{background:#1a7a4a;} .r2{background:#5aab7e;} .r3{background:#9fd4b8;color:#0f5a33;}
+.r4{background:#d6eee2;color:#1a7a4a;} .r5{background:#f0ede8;color:#aaa;} .r6{background:#e8e4dd;color:#bbb;}
+.rank-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+.rank-leg-item { display: flex; align-items: center; gap: 5px; font-size: 0.72rem; color: var(--muted); }
+.matrix-wrap { overflow-x: auto; }
+table.matrix { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 0.75rem; }
+.matrix th { font-weight: 500; font-size: 0.73rem; color: var(--muted); text-align: center; padding: 0 5px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.matrix th:first-child { text-align: left; padding-left: 0; }
+.matrix td { padding: 8px 5px; text-align: center; border-bottom: 1px solid #f0ede8; vertical-align: middle; }
+.matrix td:first-child { text-align: left; padding-left: 0; font-weight: 500; font-size: 0.85rem; }
+.matrix tr:last-child td { border-bottom: none; }
+.mcell { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 26px; border-radius: 6px; font-weight: 600; font-size: 0.82rem; }
+.mc-0{color:#ccc;} .mc-sm{background:#fdecea;color:#a93226;} .mc-md{background:#fef3e0;color:#b07000;}
+.mc-lg{background:#c8eedd;color:#0f5a33;} .mc-xl{background:var(--green-light);color:var(--green);}
+.q-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.q-tab { font-size: 0.8rem; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--white); color: var(--muted); cursor: pointer; transition: all 0.15s; font-family: inherit; }
+.q-tab:hover { border-color: #aaa; color: var(--text); }
+.q-tab.active { background: var(--green); border-color: var(--green); color: #fff; font-weight: 500; }
+.ft-section { display: none; }
+.ft-section.visible { display: block; }
+.q-header { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+.q-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 0.35rem; }
+.q-text { font-size: 1rem; font-weight: 500; line-height: 1.5; }
+.q-meta { font-size: 0.78rem; color: var(--muted); margin-top: 0.3rem; }
+.prog-dots { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 1rem; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+.dot.seen { background: var(--green-mid); } .dot.cur { background: var(--green); }
+.card-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+.nav-btn { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 16px; font-size: 0.84rem; font-family: inherit; color: var(--text); cursor: pointer; transition: all 0.15s; }
+.nav-btn:hover:not(:disabled) { border-color: #aaa; background: #f9f8f5; }
+.nav-btn:disabled { opacity: 0.28; cursor: default; }
+.nav-btn.next { background: var(--green); border-color: var(--green); color: #fff; }
+.nav-btn.next:hover:not(:disabled) { background: #145e39; }
+.nav-ctr { flex: 1; text-align: center; font-size: 0.84rem; color: var(--muted); }
+.resp-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem 1.75rem; min-height: 130px; }
+.resp-idx { font-size: 0.72rem; color: #bbb; margin-bottom: 0.6rem; font-weight: 600; }
+.resp-body { font-size: 0.97rem; line-height: 1.78; }
+.all-toggle { display: block; width: 100%; margin-top: 1rem; padding: 9px; background: none; border: 1px dashed #c8c5be; border-radius: var(--radius-sm); font-size: 0.8rem; color: #999; cursor: pointer; font-family: inherit; transition: all 0.15s; text-align: center; }
+.all-toggle:hover { border-color: #999; color: #555; background: #f9f8f5; }
+.all-list { display: none; margin-top: 1rem; }
+.all-list.open { display: block; }
+.all-item { border-left: 3px solid var(--border); padding: 0.75rem 1rem; margin-bottom: 0.75rem; background: #faf9f7; border-radius: 0 8px 8px 0; font-size: 0.88rem; line-height: 1.65; color: #333; }
+.all-item:last-child { margin-bottom: 0; }
+.all-num { font-size: 0.68rem; color: #bbb; font-weight: 700; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em; }
+footer { text-align: center; padding: 2rem; font-size: 0.75rem; color: #bbb; border-top: 1px solid var(--border); margin-top: 2rem; }
+@media (max-width: 540px) { .bar-label { width: 140px; font-size: 0.77rem; } .snav-btn { font-size: 0.77rem; padding: 6px 13px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Sondage — Politique de télétravail</h1>
+  <p>MRC de Pontiac &nbsp;·&nbsp; Avril 2026 &nbsp;·&nbsp; 22 répondants</p>
+  <span class="badge">Résultats anonymisés</span>
+</header>
+<nav class="section-nav">
+  <button class="snav-btn active" onclick="showSection('mc',this)">📊 Choix multiples</button>
+  <button class="snav-btn" onclick="showSection('ft',this)">💬 Commentaires libres</button>
+</nav>
+<main>
+  <div class="section-panel visible" id="panel-mc">
+    <p class="section-title">Réponses — Questions à choix multiples</p>
+    <div class="mc-card"><div class="mc-question">Depuis combien de temps travaillez-vous pour la MRC de Pontiac&nbsp;?</div><div class="mc-n">22 répondants</div><div id="c1"></div></div>
+    <div class="mc-card"><div class="mc-question">Est-ce que le télétravail faisait partie de&nbsp;:</div><div class="mc-note">Plusieurs réponses possibles — le total peut dépasser 22</div><div id="c2"></div></div>
+    <div class="mc-card"><div class="mc-question">La disponibilité du télétravail a-t-elle influencé votre décision d'accepter ce poste&nbsp;?</div><div class="mc-n">21 répondants — 52&nbsp;% ont répondu Oui (facteur déterminant ou mineur)</div><div id="c3"></div></div>
+    <div class="mc-card"><div class="mc-question">Quelle est votre situation de transport pour vous rendre au bureau&nbsp;?</div><div class="mc-n">22 répondants</div><div id="c4"></div></div>
+    <div class="mc-card"><div class="mc-question">Utilisiez-vous la politique de télétravail de façon régulière&nbsp;?</div><div class="mc-n">22 répondants</div><div id="c5"></div></div>
+    <div class="mc-card">
+      <div class="mc-question">Pour quelles raisons utilisiez-vous principalement le télétravail&nbsp;? <span style="font-weight:400;color:var(--muted)">(classées de la plus à la moins importante)</span></div>
+      <div class="mc-note">Classement agrégé — les barres montrent combien de répondants ont attribué chaque rang à chaque raison.</div>
+      <div id="c-ranking"></div>
+      <div class="rank-legend" id="rank-legend"></div>
+    </div>
+    <div class="mc-card"><div class="mc-question">Comment l'annulation de la politique de télétravail va-t-elle affecter votre quotidien&nbsp;?</div><div class="mc-note">Plusieurs réponses possibles — le total peut dépasser 22. Les commentaires libres de cette question sont consultables dans l'onglet Commentaires libres → Impacts quotidien.</div><div id="c-quotidien"></div></div>
+    <div class="mc-card"><div class="mc-question">Comment l'annulation de la politique nuit-elle à votre satisfaction au travail&nbsp;?</div><div class="mc-n">22 répondants</div><div id="c-satisfaction"></div></div>
+    <div class="mc-card"><div class="mc-question">Envisagez-vous de quitter l'organisation en raison de cette décision&nbsp;?</div><div class="mc-n">21 répondants — 48&nbsp;% envisagent de quitter (activement ou sérieusement)</div><div id="c6"></div></div>
+    <div class="mc-card"><div class="mc-question">Selon vous, quel sera l'impact de la fin de la politique de télétravail sur…</div><div class="mc-n">22 répondants</div><div class="matrix-wrap"><table class="matrix" id="matrix1"></table></div></div>
+    <div class="mc-card"><div class="mc-question">Pensez-vous que cette décision aura un impact positif sur l'atmosphère de travail à long terme&nbsp;?</div><div class="mc-n">22 répondants</div><div id="c7"></div></div>
+  </div>
+
+  <div class="section-panel" id="panel-ft">
+    <p class="section-title">Réponses — Commentaires libres</p>
+    <div class="q-tabs" id="qTabs"></div>
+    <div id="ftContainer"></div>
+  </div>
+</main>
+<footer>Les réponses sont anonymisées. Aucune information permettant d'identifier les répondants n'est incluse.</footer>
+<script>
+function showSection(id,btn){
+  document.querySelectorAll('.section-panel').forEach(p=>p.classList.remove('visible'));
+  document.querySelectorAll('.snav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('visible');
+  btn.classList.add('active');
+}
+const colorMap={'Oui, activement':'c-neg',"J'y pense sérieusement":'c-neg','Non, mais satisfaction diminuée':'c-warn','Non':'c-neu','Aucun impact sur mon intention de rester':'c-neu','Neutre':'c-neu','Je ne sais pas':'c-neu','Plutôt négatif':'c-neg','Très négatif':'c-neg','Pas du tout':'c-neg','Modérément':'c-warn','Considérablement':'c-neg','Très sévèrement':'c-neg','Plutôt positif':'c-pos','Très positif':'c-pos','Oui, facteur déterminant':'c-pos','Oui, facteur mineur':'c-warn',"Plus d'une heure":'c-neg','30–60 min':'c-warn','Impact négatif sur ma santé ou mon bien-être':'c-neg','Augmentation des coûts de transport':'c-neg','Augmentation significative du temps de déplacement':'c-neg','Perturbation des arrangements de garde ou de soins':'c-warn',"Peu ou pas d'impact":'c-neu','Autres impacts (commentaires)':'c-neu'};
+function barColor(l){return colorMap[l]||'c-pos';}
+function renderBar(id,rows,total){
+  const max=Math.max(...rows.map(r=>r.n),1);
+  document.getElementById(id).innerHTML=rows.filter(r=>r.n>0).map(r=>{
+    const pct=total>0?Math.round(r.n/total*100):0, w=Math.round(r.n/max*100);
+    return `<div class="bar-row"><div class="bar-label">${r.l}</div><div class="bar-track"><div class="bar-fill ${barColor(r.l)}" style="width:${w}%"></div></div><div class="bar-count">${r.n}</div><div class="bar-pct">${pct}&nbsp;%</div></div>`;
+  }).join('');
+}
+
+renderBar('c1',[{l:"Moins d'un an",n:2},{l:'1–3 ans',n:9},{l:'3–5 ans',n:5},{l:'5 ans et plus',n:6}],22);
+renderBar('c2',[{l:"L'affichage de poste lors de l'embauche",n:9},{l:"Des avantages négociés lors de l'embauche",n:3},{l:'Aucune des réponses ci-dessus',n:12}],24);
+renderBar('c3',[{l:'Oui, facteur déterminant',n:10},{l:'Oui, facteur mineur',n:1},{l:'Non',n:10}],21);
+renderBar('c4',[{l:'Moins de 15 min',n:4},{l:'15–30 min',n:12},{l:'30–60 min',n:4},{l:"Plus d'une heure",n:2}],22);
+renderBar('c5',[{l:'Oui',n:15},{l:'Non',n:7}],22);
+
+(function(){
+  const reasons=[
+    {l:'Meilleure concentration et productivité',ranks:[8,4,6,3,1,0]},
+    {l:'Réduction du temps/coût de déplacement',ranks:[7,4,6,5,0,0]},
+    {l:'Meilleur équilibre travail-vie personnelle',ranks:[3,6,4,7,2,0]},
+    {l:'Moins de distractions sociales',ranks:[0,5,5,4,7,1]},
+    {l:'Besoins de santé ou handicap',ranks:[2,3,1,3,11,2]},
+  ];
+  const rc=['r1','r2','r3','r4','r5','r6'],rl=['Rang 1','Rang 2','Rang 3','Rang 4','Rang 5','Rang 6'],total=22;
+  document.getElementById('c-ranking').innerHTML=reasons.map(r=>{
+    const segs=r.ranks.map((n,i)=>{const w=Math.round(n/total*100);return w>0?`<div class="rank-seg ${rc[i]}" style="width:${w}%" title="${rl[i]}: ${n}">${n>1?n:''}</div>`:''}).join('');
+    return `<div class="rank-row"><div class="rank-label">${r.l}</div><div class="rank-bars">${segs}</div></div>`;
+  }).join('');
+  document.getElementById('rank-legend').innerHTML=rl.map((l,i)=>
+    `<div class="rank-leg-item"><div style="width:10px;height:10px;border-radius:2px;background:${['#1a7a4a','#5aab7e','#9fd4b8','#d6eee2','#f0ede8','#e8e4dd'][i]};flex-shrink:0;"></div>${l}</div>`
+  ).join('');
+})();
+
+renderBar('c-quotidien',[
+  {l:'Impact négatif sur ma santé ou mon bien-être',n:17},
+  {l:'Augmentation des coûts de transport',n:13},
+  {l:'Augmentation significative du temps de déplacement',n:9},
+  {l:'Perturbation des arrangements de garde ou de soins',n:5},
+  {l:"Peu ou pas d'impact",n:2},
+  {l:'Autres impacts (commentaires)',n:12},
+],22);
+
+renderBar('c-satisfaction',[{l:'Très sévèrement',n:10},{l:'Considérablement',n:7},{l:'Modérément',n:3},{l:'Pas du tout',n:2}],22);
+renderBar('c6',[{l:'Oui, activement',n:3},{l:"J'y pense sérieusement",n:7},{l:'Non, mais satisfaction diminuée',n:8},{l:'Aucun impact sur mon intention de rester',n:3}],21);
+
+(function(){
+  const rows=[{l:'Cohésion des équipes',c:[9,4,9,0,0]},{l:"Sentiment d'appartenance",c:[12,4,6,0,0]},{l:'Motivation des équipes',c:[17,3,2,0,0]},{l:'Disponibilité des employés',c:[5,4,11,1,1]}];
+  const scale=['Nuira beaucoup','Nuira un peu','Neutre','Favorisera un peu','Favorisera beaucoup'];
+  const mx=Math.max(...rows.flatMap(r=>r.c));
+  function cls(n){if(!n)return'mc-0';const r=n/mx;return r<0.25?'mc-sm':r<0.5?'mc-md':r<0.75?'mc-lg':'mc-xl';}
+  const t=document.getElementById('matrix1');
+  t.innerHTML='<tr><th></th>'+scale.map(s=>`<th>${s}</th>`).join('')+'<th style="color:#bbb;font-size:0.7rem;">n</th></tr>'
+    +rows.map(r=>{const tot=r.c.reduce((a,b)=>a+b,0);return `<tr><td>${r.l}</td>${r.c.map(n=>`<td><span class="mcell ${cls(n)}">${n||'—'}</span></td>`).join('')}<td style="font-size:0.75rem;color:#bbb;font-weight:600;">${tot}</td></tr>`;}).join('');
+})();
+
+renderBar('c7',[{l:'Très positif',n:0},{l:'Plutôt positif',n:0},{l:'Neutre',n:2},{l:'Plutôt négatif',n:4},{l:'Très négatif',n:15},{l:'Je ne sais pas',n:1}],22);
+
+/* ══ FREE TEXT ══ */
+const ftData=[
+  {id:'motivation',label:'Motivation',
+   question:"Avez-vous des commentaires à partager quant à la motivation des équipes\u202f?",
+   responses:[
+    "The atmosphere has really changed negatively since the announcement was made.",
+    "La motivation des équipes sera clairement affectée négativement.",
+    "Le télétravail augmente la qualité de vie, donc la motivation aussi.",
+    "Oui\u202f! Savoir que les maires n\u2019ont pas confiance dans leurs employés me fait vouloir travailler moins et dire que je vais prendre mes pauses et mon dîner à chaque jour et mettre mes 7 heures, mais c\u2019est tout. J\u2019en ai assez de mettre le travail avant ma famille juste pour apprendre qu\u2019ils n\u2019ont pas confiance en ce que je fais\u202f!!",
+    "Quelle motivation\u2026 Nous en avions peu avant, elle est encore moins présente suite à cette décision.",
+    "L\u2019atmosphère tourne dans un sens négatif. Eux contre nous. Elle n\u2019est plus productive d\u2019une équipe avec un but en commun.",
+    "Nous avons tous le moral à terre. L\u2019ambiance est déprimante.",
+    "Mon équipe démontre une bonne motivation au quotidien, notamment grâce à une ambiance de travail positive et collaborative. Toutefois, depuis l\u2019annonce récente, je perçois un certain détachement qui pourrait affecter l\u2019engagement à moyen terme.",
+    "Le recul de nos conditions de travail est démotivant.",
+    "Depuis l\u2019annonce, je suis moins motivé, surtout en raison du manque de communication et de consultations face à des décisions qui ont des impacts majeurs sur mon quotidien et celui de mes collègues.",
+    "Des employés non consultés sur des décisions qui affectent leur bien-être et augmentent le coût de la vie ne peut que diminuer leur motivation.",
+    "Depuis l\u2019annonce, j\u2019observe une démotivation des équipes très sévère. Ça me fait de la peine de voir la MRC, l\u2019organisation qui est supposée de soulever sa communauté, en train de lui faire du mal."
+   ]},
+  {id:'cohesion',label:'Cohésion',
+   question:"Avez-vous des commentaires à partager quant à la cohésion des équipes\u202f?",
+   responses:[
+    "Les équipes ne sont pas seulement celles entre employés syndiqués, mais aussi avec l\u2019employeur et les élus. Cette cohésion est sévèrement abîmée car les employés ne se sentent pas respectés par ceux qui ont nui à leurs conditions de travail sans les consulter.",
+    "We have a good routine for 4 years.",
+    "Je pense que la surpopulation dans les espaces de bureau peut avoir l\u2019effet inverse à celui souhaité et diminuer la cohésion d\u2019équipe.",
+    "La cohésion des équipes, nous l\u2019avons déjà, ce n\u2019est pas l\u2019enlèvement de la politique de télétravail qui va améliorer ceci.",
+    "Il y a déjà beaucoup de cohésion dans mon équipe. Pas certain que ce sera le cas, une fois qu\u2019on commence à se piller sur les pieds.",
+    "Je n\u2019ai jamais eu de la difficulté de joindre quelqu\u2019un de l\u2019équipe au besoin. Même lors des rencontres externes, au bureau ou de la maison.",
+    "Drôlement, ça améliore grandement la cohésion \u2014 depuis l\u2019annonce, l\u2019équipe complète est unie et solidaire à dénoncer cette décision mal informée et sans fondement valide.",
+    "Nous avons une très bonne équipe et la fin du télétravail n\u2019a pas d\u2019impact sur notre cohésion.",
+    "Le télétravail n\u2019est pas un obstacle à la cohésion d\u2019équipe. La cohésion d\u2019équipe est améliorée par une bonne communication et des employés satisfaits et fiers de l\u2019organisme pour lequel ils travaillent.",
+    "Le télétravail hybride devrait quand même être réfléchi. Venir au bureau pour prendre des rencontres en ligne, ça n\u2019a pas de sens. Venir au bureau pour des moments précis et y faire des rencontres d\u2019équipe en présentiel, ça c\u2019est parfait et ça améliore la cohésion d\u2019équipe. Je pense même que le 100\u202f% présentiel peut nuire à la cohésion en créant des frustrations, par exemple, si j\u2019ai un\u00b7e collègue qui parle fort."
+   ]},
+  {id:'appartenance',label:'Appartenance',
+   question:"Avez-vous des commentaires à partager quant au sentiment d\u2019appartenance\u202f?",
+   responses:[
+    "Je sens un appartenance avec mes collègues. Maintenant, je ne sens plus un sentiment d\u2019appartenance avec ceux qui visent à nous enlever le pouvoir décisionnel au travail. Ils sont en train de créer une atmosphère de nous contre eux.",
+    "Il n\u2019y a pas un membre de l\u2019équipe qui tient un poste plus important qu\u2019un autre. Si on en perd un, on risque de tomber tous.",
+    "Avoir l\u2019équipe ensemble pendant une journée par semaine et se rencontrer en équipe crée un sentiment d\u2019appartenance, mais encore plus, faire des activités de groupe \u2014 même juste un dîner ensemble de temps en temps \u2014 peut faire mieux que travailler côte à côte, tassé et dérangé par ses collègues.",
+    "Le sentiment d\u2019appartenance, encore une fois, ce n\u2019est pas parce que nous faisons du télétravail que nous n\u2019avons pas le sentiment d\u2019appartenance. Mais en enlevant cette politique, nous avons l\u2019impression que peu importe les conséquences, nous ne sommes pas écoutés\u2026 Notre opinion ne compte pas pour l\u2019employeur.",
+    "Un haut roulement de personnel a généralement un impact négatif sur le sentiment d\u2019appartenance. Je pense que l\u2019impact à long terme sera négatif, parce que ceci affectera la rétention des employés en général, pas juste ceux qui viennent de loin et ceux qui comblent des postes difficiles à combler. Les écœurantites aiguës seront plus nombreuses\u202f!",
+    "Je ressens un certain éloignement entre les membres du conseil et les employés, ce qui peut nuire au sentiment d\u2019appartenance.",
+    "Le sentiment d\u2019appartenance est grandement affecté par le traitement et le respect des employés par le parti patronal. Dans le cas de l\u2019annulation du télétravail, ce fut un échec total sur toute la ligne.",
+    "Le télétravail n\u2019a aucun impact négatif sur le sentiment d\u2019appartenance\u202f; au contraire. C\u2019était un avantage et l\u2019enlever démontre le fait de ne pas être à l\u2019écoute des employés (qui n\u2019ont d\u2019ailleurs pas été consultés).",
+    "Si on voulait vraiment promouvoir le sentiment d\u2019appartenance, les employés auraient été consultés.",
+    "Des employés non consultés sur des décisions qui affectent leur bien-être et augmentent le coût de la vie ne peut que nuire à leur sentiment d\u2019appartenance.",
+    "Le télétravail hybride permettait d\u2019envoyer une image forte que la MRC est un employeur de choix. Ce retour en arrière sans consultation et sans recherches \u2014 il existe plein de recherches scientifiques démontrant les bénéfices du mode de travail hybride \u2014 démontre un manque de vision et une fermeture d\u2019esprit de la part de l\u2019employeur. Le sentiment d\u2019appartenance à la MRC en est clairement affecté."
+   ]},
+  {id:'disponibilite',label:'Disponibilité',
+   question:"Avez-vous des commentaires à partager quant à la disponibilité des employés\u202f?",
+   responses:[
+    "Les employés sont toujours aussi disponibles à la maison qu\u2019au bureau.",
+    "Je suis toujours disponible, que ce soit en télétravail ou au bureau.",
+    "Je travaille maximum une journée par semaine en télétravail parce que je suis disponible quand j\u2019ai des rencontres en présentiel \u2014 je me rends au bureau ou à la rencontre, sans question. Mais j\u2019aime savoir que j\u2019ai la possibilité de travailler en télétravail dans le calme pour me concentrer.",
+    "À mon poste, je n\u2019ai jamais eu de plainte que je n\u2019étais pas disponible.",
+    "Nos horaires surchargés ont un impact sur la disponibilité des employés, plus que l\u2019endroit d\u2019où on travaille.",
+    "Les employés en télétravail sont tout aussi disponibles que ceux en présentiel \u2014 que ce soit par courriel, téléphone, message instantané ou visioconférence Teams.",
+    "Je n\u2019ai jamais eu de problème de disponibilité, au contraire. Le télétravail permet de faire des rencontres en toute tranquillité.",
+    "Je n\u2019ai jamais trouvé que mes collègues n\u2019étaient pas disponibles, et ce même quand ils étaient en télétravail. Les dossiers se travaillaient toujours et nous étions toujours disponibles les uns pour les autres.",
+    "La disponibilité des employés demeurera inchangée.",
+    "Personnellement, je suis disponible les soirs et les fins de semaine lorsque nécessaire, je réponds à toutes les urgences dans le cadre de mon travail, j\u2019utilise mon téléphone personnel pour le travail. Ce changement au télétravail ne m\u2019encourage pas du tout à me rendre disponible plus que les heures régulières de travail. Je ne souhaite plus utiliser mon cellulaire pour le travail, donc je serai définitivement moins disponible. J\u2019avais également Teams et mes courriels sur mon téléphone \u2014 je vais les enlever."
+   ]},
+  {id:'quotidien',label:'Impacts quotidien',
+   question:"Comment l\u2019annulation de la politique de télétravail va-t-elle affecter votre quotidien\u202f? (commentaires libres)",
+   responses:[
+    "La démotivation des employés à la MRC depuis cette décision a un impact négatif sur moi, même si je ne bénéficie pas du télétravail.",
+    "Too many people in the building — not going to be able to do my work properly.",
+    "Perte de productivité.",
+    "Beaucoup plus d\u2019ouvrage pour moi. Ça va prendre beaucoup plus de mon temps.",
+    "Vraiment moins d\u2019efficacité de travail. Mon bureau est en aire ouverte et les journées où tout le monde sont au bureau dans mon département, c\u2019est difficile de se concentrer et même d\u2019entendre ce qui se dit soit au téléphone ou en rencontre virtuelle à cause du bruit des conversations alentour. Même quand deux personnes sont au téléphone en même temps, c\u2019est difficile d\u2019entendre ce qui se dit par le client.",
+    "Si les membres de l\u2019équipe commencent à quitter, il y aura une surcharge de travail qui tombera sur les employés qui restent. Ceci me stresse énormément. Le niveau des charges est déjà haut.",
+    "Ne me concerne pas, mon poste de travail n\u2019offre pas de télétravail.",
+    "Au quotidien, nous avons beaucoup de rencontres en ligne que nous planifions pendant les journées de télétravail, pour pouvoir y assister sans distraction et plus efficacement.",
+    "Entre 1h30–1h45 aller et 1h30–1h45 retour \u2014 presque 4h par jour, 20h seront perdues par semaine dans les trajets.",
+    "En espace ouvert, tenter d\u2019avoir chacun des rencontres virtuelles ou même entre collègues pendant que d\u2019autres sont en rencontres causera un dérangement significatif.",
+    "Utilisation de plus de congés maladie et autres (lors de tempêtes de neige, rhume mineur, etc.) — augmentation du coût de la vie.",
+    "Au niveau des tâches, je prends ma journée d\u2019hier au bureau : c\u2019était une journée pleine de rencontres, tout comme plusieurs collègues autour. Je devais faire des appels téléphoniques dans une ambiance très bruyante. Je me suis fait dire qu\u2019on entendait beaucoup de bruit derrière. Le télétravail en mode hybride permet de mieux cibler des journées pour les rencontres et ce genre d\u2019appels, pour que ce soit fait au calme, à la maison. Ou parfois, j\u2019ai des grosses journées de lectures de documents ou de rédaction \u2014 ce sont des moments où je suis beaucoup plus productive si je peux être dans ma bulle et me concentrer sur une seule tâche."
+   ]},
+  {id:'autres',label:'Autres commentaires',
+   question:"Autres commentaires que vous souhaitez partager",
+   responses:[
+    "Entre employés, nous sommes camarades et coéquipiers. Lorsque le travail hybride a été instauré, l\u2019équilibre des pouvoirs s\u2019est légèrement déplacé en faveur des employés. Il est clair que les responsables se sentent menacés par ce changement. Cette attitude détruit les conditions de travail à la MRC et c\u2019est vraiment dommage.",
+    "L\u2019annulation de la politique de télétravail aura clairement un impact majeur sur le recrutement, et engendrera des coûts supplémentaires importants pour la MRC, et ultimement pour les contribuables.",
+    "En espérant ne pas se rendre jusqu\u2019au renouvellement de la convention collective.",
+    "Le manque de respect et de communication envers les employés ont un impact néfaste sur l\u2019ambiance et la motivation au bureau. Nous ressentons une trahison de la façon dont tout s\u2019est produit. C\u2019est triste de voir que nous sommes seulement un petit groupe d\u2019employés et que nous ne pouvons pas travailler ensemble.",
+    "La MRC de Pontiac, en région plus éloignée, a déjà des difficultés de recrutement et de rétention des professionnels. Le télétravail est un élément essentiel pour les employés qui vivent plus loin, et le retirer aura un net impact négatif sur la qualité et l\u2019efficacité des services de notre MRC.",
+    "Dans l\u2019absence d\u2019une vision et d\u2019un plan clair de développement du territoire, on se penche sur des futilités qui sèment le doute, détruisent la confiance et font fuir les talents dont le Pontiac a besoin.",
+    "Je n\u2019ai pas trouvé d\u2019autre offre, cependant j\u2019ai définitivement regardé et je suis incertaine si je vais ou veux quitter. Mais ma satisfaction, le manque de respect et la fermeture au dialogue de la part des élus me rendent plus qu\u2019insatisfaite et ont grandement diminué ma satisfaction comme employée (surtout que j\u2019ai dit non à d\u2019autres offres pas si longtemps que ça, avec des conditions similaires de télétravail et un salaire plus élevé).",
+    "La décision d\u2019abolir la politique de télétravail sans consultation préalable nuira à la rétention d\u2019employés existants et diminuera l\u2019attractivité de la MRC de Pontiac comme employeur.",
+    "Je comprends qu\u2019ils en aient le droit légal, mais cela a été fait de mauvaise foi. Ils ont l\u2019obligation d\u2019agir dans l\u2019intérêt et pour le bien-être de la MRC. Cela nuit à la fidélisation de certains employés qualifiés qui ne se trouvent pas dans la région de Pontiac, ce qui a un impact négatif sur l\u2019ensemble du territoire. La MRC est censée être le chef de file dans la région\u202f; ces avantages devraient être mis en avant afin que d\u2019autres organisations puissent les adopter, plutôt que de maintenir des environnements de travail traditionnels restrictifs qui ne sont pas efficaces."
+   ]}
+];
+
+const st={};
+ftData.forEach(q=>{st[q.id]={i:0,seen:new Set([0]),open:false};});
+let aq=ftData[0].id;
+
+document.getElementById('qTabs').innerHTML=ftData.map(q=>
+  `<button class="q-tab${q.id===aq?' active':''}" onclick="switchQ('${q.id}')">${q.label}</button>`
+).join('');
+
+document.getElementById('ftContainer').innerHTML=ftData.map(q=>`
+  <div class="ft-section${q.id===aq?' visible':''}" id="fs-${q.id}">
+    <div class="q-header">
+      <div class="q-label">Question ouverte</div>
+      <div class="q-text">${q.question}</div>
+      <div class="q-meta">${q.responses.length} réponse${q.responses.length>1?'s':''}</div>
+    </div>
+    <div class="prog-dots" id="pd-${q.id}"></div>
+    <div class="card-nav">
+      <button class="nav-btn" id="pv-${q.id}" onclick="fnav('${q.id}',-1)">← Précédente</button>
+      <span class="nav-ctr" id="nc-${q.id}"></span>
+      <button class="nav-btn next" id="nx-${q.id}" onclick="fnav('${q.id}',1)">Suivante →</button>
+    </div>
+    <div class="resp-card">
+      <div class="resp-idx" id="ri-${q.id}"></div>
+      <div class="resp-body" id="rb-${q.id}"></div>
+    </div>
+    <button class="all-toggle" id="at-${q.id}" onclick="toggleAll('${q.id}')">Voir toutes les réponses ↓</button>
+    <div class="all-list" id="al-${q.id}">
+      ${q.responses.map((r,i)=>`<div class="all-item"><div class="all-num">Réponse ${i+1}</div>${r}</div>`).join('')}
+    </div>
+  </div>`).join('');
+
+ftData.forEach(q=>renderQ(q.id));
+
+function renderQ(id){
+  const q=ftData.find(d=>d.id===id),s=st[id],i=s.i,tot=q.responses.length;
+  document.getElementById(`rb-${id}`).textContent=q.responses[i];
+  document.getElementById(`ri-${id}`).textContent=`Réponse ${i+1} sur ${tot}`;
+  document.getElementById(`nc-${id}`).textContent=`${i+1} / ${tot}`;
+  document.getElementById(`pv-${id}`).disabled=i===0;
+  document.getElementById(`nx-${id}`).disabled=i===tot-1;
+  document.getElementById(`nx-${id}`).textContent=i<tot-1?'Suivante →':'Dernière réponse';
+  document.getElementById(`pd-${id}`).innerHTML=q.responses.map((_,di)=>{
+    let c='dot';if(di===i)c+=' cur';else if(s.seen.has(di))c+=' seen';
+    return `<span class="${c}" onclick="fjump('${id}',${di})" title="Réponse ${di+1}"></span>`;
+  }).join('');
+}
+function fnav(id,dir){const q=ftData.find(d=>d.id===id),s=st[id],n=s.i+dir;if(n<0||n>=q.responses.length)return;s.i=n;s.seen.add(n);renderQ(id);}
+function fjump(id,i){st[id].i=i;st[id].seen.add(i);renderQ(id);}
+function switchQ(id){
+  document.querySelectorAll('.ft-section').forEach(e=>e.classList.remove('visible'));
+  document.querySelectorAll('.q-tab').forEach(e=>e.classList.remove('active'));
+  document.getElementById(`fs-${id}`).classList.add('visible');
+  document.querySelector(`.q-tab[onclick="switchQ('${id}')"]`).classList.add('active');
+  aq=id;
+}
+function toggleAll(id){
+  const s=st[id];s.open=!s.open;
+  document.getElementById(`al-${id}`).classList.toggle('open',s.open);
+  document.getElementById(`at-${id}`).textContent=s.open?'Masquer les réponses ↑':'Voir toutes les réponses ↓';
+}
+</script>
+</body>
+</html>
